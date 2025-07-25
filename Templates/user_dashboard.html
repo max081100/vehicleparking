@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="row mb-4">
+    <div class="col-12 d-flex align-items-center justify-content-between">
+      <h2 class="mb-0">Welcome... {{ user.username }}!</h2>
+      
+    </div>
+  </div>
+
+  <div class="row gy-4">
+    <!-- Current Reservation Card -->
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Current Reservation</h5>
+        </div>
+        <div class="card-body">
+        {% if active_reservation %}
+          <ul class="list-group mb-3">
+            <li class="list-group-item">Parking Lot: <strong>{{ active_reservation.spot.lot.prime_location_name }}</strong></li>
+            <li class="list-group-item">Spot Number: <strong>#{{ active_reservation.spot.id }}</strong></li>
+            <li class="list-group-item">Start Time: {{ active_reservation.parking_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+          </ul>
+          <form method="POST" action="{{ url_for('release_spot', reservation_id=active_reservation.id) }}">
+            <button class="btn btn-danger w-100">Release Parking Spot</button>
+          </form>
+        {% else %}
+          <div class="mb-3 text-muted">
+            You do not have an active reservation.
+          </div>
+          <form method="POST" action="{{ url_for('reserve_parking_spot') }}">
+            <button class="btn btn-success w-100">Reserve a Parking Spot</button>
+          </form>
+        {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Parking History Table -->
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Parking History</h5>
+        </div>
+        <div class="card-body p-0">
+          <div style="overflow-x:auto;">
+            <table class="table table-sm table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Lot</th><th>Spot</th><th>Start</th><th>End</th><th>Time (hrs)</th><th>Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for res in history %}
+                  <tr>
+                    <td>{{ res.spot.lot.prime_location_name }}</td>
+                    <td>#{{ res.spot.id }}</td>
+                    <td>{{ res.parking_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>
+                      {% if res.leaving_timestamp %}
+                        {{ res.leaving_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                      {% else %}
+                        <span class="badge bg-warning text-dark">Active</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if res.leaving_timestamp %}
+                        {{ "%.2f"|format((res.leaving_timestamp - res.parking_timestamp).total_seconds()/3600) }}
+                      {% else %}--{% endif %}
+                    </td>
+                    <td>
+                      {% if res.leaving_timestamp and res.total_cost is defined %}
+                        ₹{{ "%.2f"|format(res.total_cost) }}
+                      {% else %}--{% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                      No parking history yet.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- End row -->
+
+  <!-- Usage Chart Section -->
+  <div class="row mt-5">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Your Parking Lot Usage</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="userSummaryChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('userSummaryChart').getContext('2d');
+  const lotUsage = {};
+  {% for res in history %}
+    {% if res.leaving_timestamp %}
+      let lotName = "{{ res.spot.lot.prime_location_name|escapejs }}";
+      let hours = {{ ((res.leaving_timestamp - res.parking_timestamp).total_seconds()/3600)|round(2) }};
+      lotUsage[lotName] = (lotUsage[lotName] || 0) + hours;
+    {% endif %}
+  {% endfor %}
+  const labels = Object.keys(lotUsage);
+  const values = Object.values(lotUsage);
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels.length > 0 ? labels : ["No Data"],
+      datasets: [{
+        label: "Total Hours Parked per Lot",
+        data: values.length > 0 ? values : [1],
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(255, 99, 132, 0.7)'
+        ]
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom' },
+        title: { display: false }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}
+
+ 
+

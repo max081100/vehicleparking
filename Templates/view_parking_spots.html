@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Parking Spots for Lot: {{ lot.name }}</h2>
+<table>
+  <tr>
+    <th>Spot #</th>
+    <th>Status</th>
+    <th>Delete</th>
+  </tr>
+  {% for spot in spots %}
+    <tr>
+      <td>{{ spot.spot_number }}</td>
+      <td>{{ spot.status }}</td>
+      <td>
+        {% if spot.status == 'EMPTY' %}
+          <form action="{{ url_for('delete_parking_spot', spot_id=spot.id) }}" method="post" style="display:inline;">
+            <button class="btn red" type="submit">Delete</button>
+          </form>
+        {% else %}
+          N/A
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

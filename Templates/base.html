@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Vehicle Parking App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</head>
+<body>
+    <nav>
+       
+        <a href="{{ url_for('home') }}">Home</a>
+        {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        {% elif session.get('user_id') %}
+            <a href="{{ url_for('user_dashboard') }}">User Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('user_login') }}">User Login</a>
+            <a href="{{ url_for('admin_login') }}">Admin Login</a>
+        {% endif %}
+        {% if session.get('is_admin') or session.get('user_id') %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </nav>
+    <div class="container">
+    <div>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<h3>Registered Users</h3>
+<table>
+  <tr><th>ID</th><th>Name</th><th>Email</th></tr>
+  {% for u in users %}
+    <tr><td>{{ u.id }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Parking Lots</h3>
+<a class="btn" href="{{ url_for('create_parking_lot') }}">Add Parking Lot</a>
+<table>
+  <tr>
+    <th>ID</th><th>Name</th><th>Location</th><th>Manage</th>
+  </tr>
+  {% for lot in lots %}
+    <tr>
+      <td>{{ lot.id }}</td>
+      <td>{{ lot.name }}</td>
+      <td>{{ lot.location }}</td>
+      <td>
+        <a class="btn" href="{{ url_for('edit_parking_lot', lot_id=lot.id) }}">Edit</a>
+        <form action="{{ url_for('delete_parking_lot', lot_id=lot.id) }}" method="post" style="display:inline;">
+          <button class="btn red" type="submit">Delete</button>
+        </form>
+        <a class="btn" href="{{ url_for('view_parking_spots', lot_id=lot.id) }}">Spots</a>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<h3>All Parking History</h3>
+<table>
+  <tr><th>User</th><th>Spot</th><th>Start</th><th>End</th><th>Time(min)</th><th>Cost</th></tr>
+  {% for r in reservations %}
+  <tr>
+    <td>{{ r.user.name }}</td>
+    <td>{{ r.spot.spot_number }}</td>
+    <td>{{ r.start_time }}</td>
+    <td>{{ r.end_time or "-" }}</td>
+    <td>{{ r.total_time or '-' }}</td>
+    <td>{% if r.cost is not none %}₹ {{ r.cost }}{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

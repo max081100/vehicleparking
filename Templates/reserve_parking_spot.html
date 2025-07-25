@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Reserve a Parking Spot</h2>
+<form method="post">
+    <label>Select Parking Lot:</label>
+    <select name="lot_id">
+        {% for lot in lots %}
+        <option value='slot 1'> </option>
+        {% endfor %}
+    </select><br><br>
+    <button class="btn" type="submit">Reserve</button>
+</form>
+{% endblock %}

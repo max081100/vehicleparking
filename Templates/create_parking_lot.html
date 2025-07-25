@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Parking Lot</h2>
+<form method="post">
+    <label>Lot Name:</label><br><input type="text" name="name" required><br>
+    <label>Location:</label><br><input type="text" name="location" required><br>
+    <label>Number of Spots:</label><br><input type="number" name="num_spots" min="1" required><br><br>
+    <button class="btn" type="submit">Create</button>
+</form>
+{% endblock %}

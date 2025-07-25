@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Parking Lot #{{ lot.id }}</h2>
+<form method="post">
+    <label>Lot Name:</label><br><input type="text" name="name" value="{{ lot.name }}" required><br>
+    <label>Location:</label><br><input type="text" name="location" value="{{ lot.location }}" required><br><br>
+    <button class="btn" type="submit">Save Changes</button>
+</form>
+{% endblock %}
